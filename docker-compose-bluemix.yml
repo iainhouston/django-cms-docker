@@ -1,0 +1,29 @@
+web:
+  restart: always
+  image: registry.eu-gb.bluemix.net/iainhouston/djangocmsdocker_web
+  expose:
+    - "8000"
+  volumes:
+    - django-cms-app-vol:/usr/src/app:rw
+  links:
+    - postgres:postgres  
+  env_file: .env
+  command: /usr/local/bin/gunicorn mycms.wsgi:application -w 2 -b :8000
+
+nginx:
+  restart: always
+  image: registry.eu-gb.bluemix.net/iainhouston/djangocmsdocker_nginx
+  ports:
+    - "80:80"
+  volumes:
+    - django-cms-app-vol:/usr/src/app:rw
+  links:
+    - web:web
+
+postgres:
+  restart: always
+  image: registry.eu-gb.bluemix.net/iainhouston/djangocmsdocker_postgres
+  volumes:
+    - django-cms-postgres-vol:/var/lib/postgresql:rw
+  ports:
+    - "5432:5432"
